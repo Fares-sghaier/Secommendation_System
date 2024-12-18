@@ -1,0 +1,10 @@
+flask
+flask-cors
+openai
+python-dotenv
+reportlab
+PyPDF2
+langdetect
+requests
+arabic-reshaper
+python-bidi
