@@ -259,6 +259,7 @@ def extract_pdf_text_from_url(url):
     try:
         response = requests.get(url, timeout=30)
         if response.status_code != 200:
+            print(f"Failed to fetch PDF: Status code {response.status_code}")
             return ""
 
         raw_data = response.content
@@ -270,14 +271,20 @@ def extract_pdf_text_from_url(url):
 
                 # Decrypt if the PDF is encrypted
                 if read_pdf.is_encrypted:
-                    read_pdf.decrypt("")  # Try decrypting with an empty password
+                    try:
+                        read_pdf.decrypt("")  # Try decrypting with an empty password
+                    except Exception as decrypt_error:
+                        print(f"Decryption error: {str(decrypt_error)}")
+                        return ""
 
                 extracted_text = " ".join(page.extract_text() for page in read_pdf.pages)
             except Exception as e:
+                print(f"PDF processing error: {str(e)}")
                 return ""
 
         return extracted_text
-    except:
+    except Exception as e:
+        print(f"General error: {str(e)}")
         return ""
 
 
