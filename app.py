@@ -324,19 +324,54 @@ def format_response(text, language):
         'text': text
     }
 
+# @app.route('/get-pdf-suggestions', methods=['POST'])
+# def get_pdf_suggestions():
+#     pdf_url = request.form.get('url')
+#     if not pdf_url:
+#         return jsonify({"error": "URL not provided"}), 400
+
+#     extracted_text = extract_pdf_text_from_url(pdf_url)
+#     if not extracted_text:
+#         return jsonify({"error": "Failed to extract text from PDF"}), 400
+
+#     language = detect_language(extracted_text)
+#     suggestions = predict_suggestions(extracted_text, language)
+#     return jsonify({"suggestions": suggestions})
+
 @app.route('/get-pdf-suggestions', methods=['POST'])
 def get_pdf_suggestions():
-    pdf_url = request.form.get('url')
-    if not pdf_url:
-        return jsonify({"error": "URL not provided"}), 400
+    try:
+        # Log the incoming request data
+        sys.stdout.write(f"Received form data: {request.form}\n")
+        sys.stdout.flush()
+        
+        pdf_url = request.form.get('url')
+        if not pdf_url:
+            sys.stdout.write("No URL provided in form data\n")
+            sys.stdout.flush()
+            return jsonify({"error": "URL not provided"}), 400
 
-    extracted_text = extract_pdf_text_from_url(pdf_url)
-    if not extracted_text:
-        return jsonify({"error": "Failed to extract text from PDF"}), 400
+        sys.stdout.write(f"Attempting to extract text from URL: {pdf_url}\n")
+        sys.stdout.flush()
+        
+        extracted_text = extract_pdf_text_from_url(pdf_url)
+        if not extracted_text:
+            sys.stdout.write("Text extraction failed\n")
+            sys.stdout.flush()
+            return jsonify({"error": "Failed to extract text from PDF"}), 400
 
-    language = detect_language(extracted_text)
-    suggestions = predict_suggestions(extracted_text, language)
-    return jsonify({"suggestions": suggestions})
+        sys.stdout.write(f"Successfully extracted text of length: {len(extracted_text)}\n")
+        sys.stdout.flush()
+
+        language = detect_language(extracted_text)
+        suggestions = predict_suggestions(extracted_text, language)
+        return jsonify({"suggestions": suggestions})
+    except Exception as e:
+        sys.stdout.write(f"Endpoint error: {str(e)}\n")
+        sys.stdout.flush()
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8000)
+
+
