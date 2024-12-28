@@ -1,4 +1,4 @@
-FROM python:3.12.2
+FROM python:3.12.4
 
 # Set working directory
 WORKDIR /app
@@ -6,12 +6,12 @@ WORKDIR /app
 #RUN mkdir -p /app/fonts
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommend \
     locales \
     libpoppler-cpp-dev \
     libxml2-dev \
     libxslt1-dev \
-    && locale-gen fr_FR.UTF-8 \
+    && local-gen fr_FR-UTF-8 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
