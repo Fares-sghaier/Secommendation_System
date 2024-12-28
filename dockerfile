@@ -1,4 +1,4 @@
-FROM python:3.12.4
+FROM python:3.12.2
 
 # Set working directory
 WORKDIR /app
@@ -6,12 +6,12 @@ WORKDIR /app
 #RUN mkdir -p /app/fonts
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommend \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     locales \
     libpoppler-cpp-dev \
     libxml2-dev \
     libxslt1-dev \
-    && local-gen fr_FR-UTF-8 \
+    && locale-gen fr_FR.UTF-8 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -20,7 +20,7 @@ RUN pip install PyPDF2
 #new
 RUN pip install arabic-reshaper
 RUN pip install python-bidi
-RUN pip install pycryptodome
+
 
 # Copy requirements
 COPY requirements.txt .

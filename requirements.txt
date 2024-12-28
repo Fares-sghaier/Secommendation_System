@@ -8,4 +8,4 @@ langdetect
 requests
 arabic-reshaper
 python-bidi
-PyCryptodome
+
