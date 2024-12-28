@@ -20,7 +20,7 @@ RUN pip install PyPDF2
 #new
 RUN pip install arabic-reshaper
 RUN pip install python-bidi
-
+RUN pip install pycryptodome
 
 # Copy requirements
 COPY requirements.txt .
