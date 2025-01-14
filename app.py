@@ -91,7 +91,7 @@ app.config.update(
 load_dotenv()
 
 azure_search_service_endpoint=os.getenv("azure_search_service_endpoint")
-azure_search_service_admin_key=os.getenv("azure_search_service_admin_key")
+azure_search_service_admin_key="nVqJ4DYb7YZmr9J0UNDykHqxhPSiDGN3qhgFiCckYVAzSeATkq7v"
 search_index_name=os.getenv("search_index_name")
 
 client = AzureOpenAI(
