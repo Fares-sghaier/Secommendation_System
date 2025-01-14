@@ -89,10 +89,16 @@ app.config.update(
 
 # Load Azure OpenAI configuration
 load_dotenv()
+
+azure_search_service_endpoint="https://docss.search.windows.net"
+search_index_name="index_name"
+azure_search_service_admin_key="nVqJ4DYb7YZmr9J0UNDykHqxhPSiDGN3qhgFiCckYVAzSeATkq7v"
+
+
 client = AzureOpenAI(
     api_key=os.getenv('AZURE_OPENAI_API_KEY'),
     azure_endpoint=os.getenv('AZURE_OPENAI_ENDPOINT'),
-    api_version=os.getenv('AZURE_OPENAI_API_VERSION')
+    api_version=os.getenv('AZURE_OPENAI_API_VERSION'),
 )
 deployment_name = "gpt-4"
 
@@ -246,8 +252,23 @@ def predict_suggestions(input_text, language):
             temperature=0.5,
             top_p=0.8,
             presence_penalty=0,
-            stream=False
-        )
+    extra_body={
+        "data_sources": [
+            {
+                "type": "azure_search",
+                "parameters": {
+                    "endpoint": azure_search_service_endpoint,
+                    "index_name": search_index_name,
+                    "authentication": {
+                        "type": "api_key",
+                        "key": azure_search_service_admin_key,
+                    }
+                }
+            }
+        ]
+    }
+)  
+        
         
         response_content = completion.choices[0].message.content
         return format_response(response_content, language)
@@ -373,5 +394,3 @@ def get_pdf_suggestions():
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8000)
-
-
