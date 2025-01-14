@@ -89,10 +89,15 @@ app.config.update(
 
 # Load Azure OpenAI configuration
 load_dotenv()
+
+azure_search_service_endpoint=os.getenv("azure_search_service_endpoint")
+azure_search_service_admin_key=os.getenv("azure_search_service_admin_key")
+search_index_name=os.getenv("search_index_name")
+
 client = AzureOpenAI(
     api_key=os.getenv('AZURE_OPENAI_API_KEY'),
     azure_endpoint=os.getenv('AZURE_OPENAI_ENDPOINT'),
-    api_version=os.getenv('AZURE_OPENAI_API_VERSION')
+    api_version=os.getenv('AZURE_OPENAI_API_VERSION'),
 )
 deployment_name = "gpt-4"
 
@@ -246,8 +251,23 @@ def predict_suggestions(input_text, language):
             temperature=0.5,
             top_p=0.8,
             presence_penalty=0,
-            stream=False
-        )
+    extra_body={
+        "data_sources": [
+            {
+                "type": "azure_search",
+                "parameters": {
+                    "endpoint": azure_search_service_endpoint,
+                    "index_name": search_index_name,
+                    "authentication": {
+                        "type": "api_key",
+                        "key": azure_search_service_admin_key,
+                    }
+                }
+            }
+        ]
+    }
+)  
+        
         
         response_content = completion.choices[0].message.content
         return format_response(response_content, language)
