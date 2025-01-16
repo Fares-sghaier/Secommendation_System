@@ -235,8 +235,8 @@ def create_pdf(content_list, language='en'):
 
     # Add metadata (title and author)
     def add_metadata(canvas, doc):
-        canvas.setTitle("E-tafakna Recommendations")
-        canvas.setAuthor("E-tafakna")
+        canvas.setTitle("E-Tafakna Recommendations")
+        canvas.setAuthor("E-Tafakna")
 
     doc.build(elements, onFirstPage=add_metadata)
 
