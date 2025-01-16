@@ -90,9 +90,9 @@ app.config.update(
 # Load Azure OpenAI configuration
 load_dotenv()
 
-azure_search_service_endpoint=os.getenv("azure_search_service_endpoint")
+azure_search_service_endpoint="https://docss.search.windows.net"
 azure_search_service_admin_key="nVqJ4DYb7YZmr9J0UNDykHqxhPSiDGN3qhgFiCckYVAzSeATkq7v"
-search_index_name=os.getenv("search_index_name")
+search_index_name="index_name"
 
 client = AzureOpenAI(
     api_key=os.getenv('AZURE_OPENAI_API_KEY'),
@@ -185,12 +185,12 @@ def get_styles(language='en'):
     return title_style, section_style, content_style
 
 def create_pdf(content_list, language='en'):
+
     # Ensure font is registered before creating PDF
     if language == 'ar' and not download_and_register_font():
         print("Warning: Could not load Arabic font, falling back to default")
-    
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    filename = f"{timestamp}.pdf"
+
+    filename = f"recommendation.pdf"
     filepath = os.path.join(PDF_DIR, filename)
 
     doc = SimpleDocTemplate(
@@ -204,7 +204,7 @@ def create_pdf(content_list, language='en'):
 
     title_style, section_style, content_style = get_styles(language)
     elements = []
-    
+
     # Add main title
     title_text = LANGUAGE_CONFIGS[language]['pdf_title']
     if language == 'ar':
@@ -217,7 +217,7 @@ def create_pdf(content_list, language='en'):
         text = item['text']
         if language == 'ar':
             text = process_arabic_text(text)
-            
+
         if item['type'] == 'header':
             elements.append(Paragraph(text, section_style))
         else:
@@ -233,7 +233,13 @@ def create_pdf(content_list, language='en'):
         elements.append(Spacer(1, 20))
         elements.append(img)
 
-    doc.build(elements)
+    # Add metadata (title and author)
+    def add_metadata(canvas, doc):
+        canvas.setTitle("E-tafakna Recommendations")
+        canvas.setAuthor("E-tafakna")
+
+    doc.build(elements, onFirstPage=add_metadata)
+
     return url_for('static', filename=f'pdfs/{filename}', _external=True)
 
 def predict_suggestions(input_text, language):
