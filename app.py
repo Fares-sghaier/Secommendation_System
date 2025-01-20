@@ -44,8 +44,12 @@ LANGUAGE_CONFIGS = {
         'system_prompt': """You are a specialized legal assistant. Analyze the contract according to the structure:
 Missing Articles/Clauses: 
 Problem Description:
-Recommendation: 
--give an example of recommendation"""
+Recommendation:
+- Provide recommendations as a bulleted list.
+- Example:
+• Recommendation 1
+• Recommendation 2
+"""
     },
     'fr': {
         'sections': {
@@ -58,7 +62,11 @@ Recommendation:
 Articles/Clauses Manquantes: 
 Description du problème:
 Recommandation:
--donne un exemple de recommandation"""
+- Fournissez les recommandations sous forme de liste à puces.
+- Exemple :
+• Recommandation 1
+• Recommandation 2
+"""
     },
     'ar': {
         'sections': {
@@ -71,7 +79,11 @@ Recommandation:
 المواد و البنود المفقودة:
 وصف المشكلة:
 التوصية:
--قدم مثالا في سطر واحد على كل توصية"""
+- قدم التوصيات في شكل نقاط.
+- مثال:
+• التوصية 1
+• التوصية 2
+"""
     }
 }
 
@@ -235,8 +247,8 @@ def create_pdf(content_list, language='en'):
 
     # Add metadata (title and author)
     def add_metadata(canvas, doc):
-        canvas.setTitle("E-tafakna Recommendations")
-        canvas.setAuthor("E-tafakna")
+        canvas.setTitle("E-Tafakna Recommendations")
+        canvas.setAuthor("E-Tafakna")
 
     doc.build(elements, onFirstPage=add_metadata)
 
@@ -254,7 +266,7 @@ def predict_suggestions(input_text, language):
                 {"role": "user", "content": input_text}
             ],
             max_tokens=1000,
-            temperature=0.5,
+            temperature=0.7,
             top_p=0.8,
             presence_penalty=0,
     extra_body={
@@ -349,20 +361,6 @@ def format_response(text, language):
         'pdf_url': pdf_url,
         'text': text
     }
-
-# @app.route('/get-pdf-suggestions', methods=['POST'])
-# def get_pdf_suggestions():
-#     pdf_url = request.form.get('url')
-#     if not pdf_url:
-#         return jsonify({"error": "URL not provided"}), 400
-
-#     extracted_text = extract_pdf_text_from_url(pdf_url)
-#     if not extracted_text:
-#         return jsonify({"error": "Failed to extract text from PDF"}), 400
-
-#     language = detect_language(extracted_text)
-#     suggestions = predict_suggestions(extracted_text, language)
-#     return jsonify({"suggestions": suggestions})
 
 @app.route('/get-pdf-suggestions', methods=['POST'])
 def get_pdf_suggestions():
