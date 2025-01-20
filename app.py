@@ -99,7 +99,6 @@ app.config.update(
     MAX_CONTENT_LENGTH=16 * 1024 * 1024
 )
 
-# Load Azure OpenAI configuration
 load_dotenv()
 
 azure_search_service_endpoint="https://docss.search.windows.net"
