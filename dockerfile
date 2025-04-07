@@ -1,5 +1,9 @@
 FROM python:3.12.2
 
+# Set environment variables for Tesseract
+ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
+ENV PYTHONPATH=/usr/local/lib/python3.12/site-packages
+
 # Set working directory
 WORKDIR /app
 
@@ -20,16 +24,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxext6 \
     libxrender-dev \
     poppler-utils \
+    pkg-config \
     && locale-gen fr_FR.UTF-8 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Add Tesseract to PATH
-ENV PATH="/usr/bin:$PATH"
+# Verify Tesseract installation and data
+RUN tesseract --version && \
+    tesseract --list-langs && \
+    ls -l /usr/share/tesseract-ocr/4.00/tessdata
 
 # Install Python packages
 RUN pip install --no-cache-dir \
-    pytesseract \
+    pytesseract==0.3.10 \
     langdetect \
     PyPDF2 \
     arabic-reshaper \
@@ -37,9 +44,6 @@ RUN pip install --no-cache-dir \
     pycryptodome \
     Flask \
     pillow
-
-# Verify Tesseract installation
-RUN tesseract --version
 
 # Create necessary directories
 RUN mkdir -p /app/static/pdfs
