@@ -1,8 +1,10 @@
 FROM python:3.12.2
 
-# Set environment variables for Tesseract
+# Set environment variables for Tesseract and Python path
 ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
 ENV PYTHONPATH=/usr/local/lib/python3.12/site-packages
+# Ensure Tesseract is in the PATH
+ENV PATH="/usr/bin:$PATH"
 
 # Set working directory
 WORKDIR /app
