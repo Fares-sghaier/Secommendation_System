@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libtesseract-dev \
     libleptonica-dev \
     pkg-config \
+    wget \
     && locale-gen fr_FR.UTF-8 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -28,6 +29,9 @@ RUN pip install --no-cache-dir \
     arabic-reshaper \
     python-bidi \
     pycryptodome
+
+# Verify Tesseract installation
+RUN tesseract --version
 
 # Create necessary directories
 RUN mkdir -p /app/static/pdfs
