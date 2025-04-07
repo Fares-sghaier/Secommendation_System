@@ -1,5 +1,11 @@
 FROM python:3.12.2
 
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    LANG=fr_FR.UTF-8 \
+    LANGUAGE=fr_FR.UTF-8
+
 # Set working directory
 WORKDIR /app
 
@@ -21,30 +27,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python packages
-RUN pip install --no-cache-dir \
-    pytesseract \
-    langdetect \
-    PyPDF2 \
-    arabic-reshaper \
-    python-bidi \
-    pycryptodome
+# Copy requirements first to leverage Docker cache
+COPY requirements.txt .
 
-# Verify Tesseract installation
-RUN tesseract --version
+# Install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 
-# Create necessary directories
+# Create non-root user and switch to it
+RUN useradd -m appuser && chown -R appuser /app
+USER appuser
+
+# Create necessary directories (ensure writable by appuser)
 RUN mkdir -p /app/static/pdfs
 
-# Copy requirements and install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
 # Copy application files
-COPY . .
+COPY --chown=appuser:appuser . .
 
 # Expose port
 EXPOSE 8000
+
 
 # Command to run the application
 CMD ["python", "app.py"]
