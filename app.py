@@ -20,7 +20,9 @@ import arabic_reshaper
 from bidi.algorithm import get_display
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-
+import pytesseract
+import PIL
+from io import BytesIO
 
 # Configure system encoding
 sys.stdout.reconfigure(encoding='utf-8')
@@ -267,22 +269,7 @@ def predict_suggestions(input_text, language):
             max_tokens=1000,
             temperature=0.7,
             top_p=0.8,
-            presence_penalty=0,
-    extra_body={
-        "data_sources": [
-            {
-                "type": "azure_search",
-                "parameters": {
-                    "endpoint": azure_search_service_endpoint,
-                    "index_name": search_index_name,
-                    "authentication": {
-                        "type": "api_key",
-                        "key": azure_search_service_admin_key,
-                    }
-                }
-            }
-        ]
-    }
+            presence_penalty=0
 )  
         
         
@@ -361,6 +348,21 @@ def format_response(text, language):
         'text': text
     }
 
+def extract_text_from_image_url(url):
+    """Extract text from an image URL using OCR."""
+    try:
+        response = requests.get(url, timeout=30)
+        if response.status_code != 200:
+            print(f"Failed to fetch image: Status code {response.status_code}")
+            return ""
+
+        image = PIL.Image.open(BytesIO(response.content))
+        extracted_text = pytesseract.image_to_string(image, lang='ara+eng+fra')
+        return extracted_text.strip()
+    except Exception as e:
+        print(f"Image processing error: {str(e)}")
+        return ""
+
 @app.route('/get-pdf-suggestions', methods=['POST'])
 def get_pdf_suggestions():
     try:
@@ -368,31 +370,46 @@ def get_pdf_suggestions():
         sys.stdout.write(f"Received form data: {request.form}\n")
         sys.stdout.flush()
         
-        pdf_url = request.form.get('url')
-        if not pdf_url:
+        pdf_url = request.form.get('pdf_url')
+        image_url = request.form.get('image_url')
+
+        if not pdf_url and not image_url:
             sys.stdout.write("No URL provided in form data\n")
             sys.stdout.flush()
-            return jsonify({"error": "URL not provided"}), 400
+            return jsonify({"error": "No URL provided"}), 400
 
-        sys.stdout.write(f"Attempting to extract text from URL: {pdf_url}\n")
-        sys.stdout.flush()
+        extracted_text = ""
         
-        extracted_text = extract_pdf_text_from_url(pdf_url)
-        if not extracted_text:
-            sys.stdout.write("Text extraction failed\n")
+        if pdf_url:
+            sys.stdout.write(f"Attempting to extract text from PDF URL: {pdf_url}\n")
             sys.stdout.flush()
-            return jsonify({"error": "Failed to extract text from PDF"}), 400
+            extracted_text = extract_pdf_text_from_url(pdf_url)
+            if not extracted_text:
+                sys.stdout.write("Text extraction from PDF failed\n")
+                sys.stdout.flush()
+                return jsonify({"error": "Failed to extract text from PDF"}), 400
+
+        elif image_url:
+            sys.stdout.write(f"Attempting to extract text from Image URL: {image_url}\n")
+            sys.stdout.flush()
+            extracted_text = extract_text_from_image_url(image_url)
+            if not extracted_text:
+                sys.stdout.write("Text extraction from Image failed\n")
+                sys.stdout.flush()
+                return jsonify({"error": "Failed to extract text from Image"}), 400
 
         sys.stdout.write(f"Successfully extracted text of length: {len(extracted_text)}\n")
         sys.stdout.flush()
-
         language = detect_language(extracted_text)
         suggestions = predict_suggestions(extracted_text, language)
+        print
         return jsonify({"suggestions": suggestions})
     except Exception as e:
         sys.stdout.write(f"Endpoint error: {str(e)}\n")
         sys.stdout.flush()
         return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8000)

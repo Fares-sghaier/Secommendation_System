@@ -13,6 +13,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxslt1-dev \
     && locale-gen fr_FR.UTF-8 \
     && apt-get clean \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    tesseract-ocr-ara \
+    tesseract-ocr-fra \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install langdetect
@@ -39,3 +43,37 @@ EXPOSE 8000
 
 # Command to run the application
 CMD ["python", "app.py"]
+
+
+
+# Base image with Python
+FROM python:3.10-slim
+
+# Prevents interactive dialogs
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies and Tesseract OCR with Arabic and French support
+RUN apt-get update && apt-get install -y \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    tesseract-ocr-ara \
+    tesseract-ocr-fra \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    poppler-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements and install Python packages
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of your code
+COPY . .
+
+# Optional: Define default command (update if you have a script)
+CMD ["python"]
