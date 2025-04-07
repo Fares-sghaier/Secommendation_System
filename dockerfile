@@ -1,13 +1,9 @@
 FROM python:3.12.2
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    LANG=fr_FR.UTF-8 \
-    LANGUAGE=fr_FR.UTF-8
-
 # Set working directory
 WORKDIR /app
+
+#RUN mkdir -p /app/fonts
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -15,38 +11,44 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpoppler-cpp-dev \
     libxml2-dev \
     libxslt1-dev \
+    && locale-gen fr_FR.UTF-8 \
+    && apt-get clean \
     tesseract-ocr \
     tesseract-ocr-eng \
     tesseract-ocr-ara \
     tesseract-ocr-fra \
-    libtesseract-dev \
-    libleptonica-dev \
-    pkg-config \
-    wget \
-    && locale-gen fr_FR.UTF-8 \
-    && apt-get clean \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    poppler-utils 
     && rm -rf /var/lib/apt/lists/*
+  
 
-# Copy requirements first to leverage Docker cache
+RUN pip install langdetect
+RUN pip install PyPDF2
+#new
+RUN pip install arabic-reshaper
+RUN pip install python-bidi
+RUN pip install pycryptodome
+
+
+RUN pip install Flask  pytesseract pillow
+RUN apt-get update && apt-get install -y tesseract-ocr
+# Copy requirements
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Create non-root user and switch to it
-RUN useradd -m appuser && chown -R appuser /app
-USER appuser
-
-# Create necessary directories (ensure writable by appuser)
+#new
 RUN mkdir -p /app/static/pdfs
 
 # Copy application files
-COPY --chown=appuser:appuser . .
+COPY . .
 
 # Expose port
 EXPOSE 8000
-
 
 # Command to run the application
 CMD ["python", "app.py"]
