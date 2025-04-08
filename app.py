@@ -36,7 +36,38 @@ FONT_URL = "https://raw.githubusercontent.com/frappe/fonts/master/usr_share_font
 
 app = Flask(__name__)
 CORS(app)
+import os
+import subprocess
 
+# Try to find tesseract installation
+try:
+    # Check if tesseract is in PATH
+    result = subprocess.run(['which', 'tesseract'], 
+                           capture_output=True, text=True, check=False)
+    tesseract_path = result.stdout.strip()
+    
+    if tesseract_path:
+        print(f"Found tesseract at: {tesseract_path}")
+        pytesseract.pytesseract.tesseract_cmd = tesseract_path
+    else:
+        # Try common locations
+        common_paths = [
+            '/usr/bin/tesseract',
+            '/usr/local/bin/tesseract'
+        ]
+        
+        for path in common_paths:
+            if os.path.exists(path):
+                print(f"Setting tesseract path to: {path}")
+                pytesseract.pytesseract.tesseract_cmd = path
+                break
+    
+    # Verify it works
+    version = pytesseract.get_tesseract_version()
+    print(f"Tesseract version: {version}")
+    
+except Exception as e:
+    print(f"Error configuring tesseract: {e}")
 # Language-specific configurations
 LANGUAGE_CONFIGS = {
     'en': {
@@ -350,14 +381,34 @@ def format_response(text, language):
 def extract_text_from_image_url(url):
     """Extract text from an image URL using OCR."""
     try:
+        print(f"Processing image URL: {url}")
         response = requests.get(url, timeout=30)
         if response.status_code != 200:
             print(f"Failed to fetch image: Status code {response.status_code}")
             return ""
 
         image = PIL.Image.open(BytesIO(response.content))
-        extracted_text = pytesseract.image_to_string(image, lang='ara+eng+fra')
-        return extracted_text.strip()
+        print(f"Image opened successfully: {image.format}, size: {image.size}")
+        
+        # Check tesseract configuration
+        print(f"Using tesseract at: {pytesseract.pytesseract.tesseract_cmd}")
+        
+        try:
+            extracted_text = pytesseract.image_to_string(image, lang='ara+eng+fra')
+            print(f"OCR successful, extracted {len(extracted_text)} characters")
+            return extracted_text.strip()
+        except Exception as ocr_e:
+            print(f"OCR failed: {str(ocr_e)}")
+            
+            # Fallback: Try with just English
+            try:
+                print("Trying fallback OCR with English only...")
+                extracted_text = pytesseract.image_to_string(image, lang='eng')
+                return extracted_text.strip()
+            except Exception as fallback_e:
+                print(f"Fallback OCR failed: {str(fallback_e)}")
+                return ""
+            
     except Exception as e:
         print(f"Image processing error: {str(e)}")
         return ""

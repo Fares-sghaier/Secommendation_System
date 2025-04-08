@@ -8,6 +8,8 @@ langdetect
 requests
 arabic-reshaper
 python-bidi
-PyCryptodome
+
 pytesseract
 pillow
+subprocess
+PyCryptodome
