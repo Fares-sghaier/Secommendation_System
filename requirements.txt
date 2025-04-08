@@ -11,5 +11,4 @@ python-bidi
 
 pytesseract
 pillow
-subprocess
 PyCryptodome
