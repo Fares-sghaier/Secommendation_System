@@ -245,7 +245,6 @@ def create_pdf(content_list, language='en'):
         img.hAlign = 'CENTER'
         elements.append(Spacer(1, 20))
         elements.append(img)
-
     # Add metadata (title and author)
     def add_metadata(canvas, doc):
         canvas.setTitle("E-Tafakna Recommendations")
