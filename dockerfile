@@ -21,6 +21,7 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get install ffmpeg -y
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
