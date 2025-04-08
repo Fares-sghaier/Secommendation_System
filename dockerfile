@@ -16,6 +16,8 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+    sudo apt-get update
+sudo apt-get install  tesseract-ocr-dev python3-pil 
 # Set locale environment variables
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en

@@ -103,9 +103,6 @@ app.config.update(
 
 load_dotenv()
 
-azure_search_service_endpoint="https://docss.search.windows.net"
-azure_search_service_admin_key="nVqJ4DYb7YZmr9J0UNDykHqxhPSiDGN3qhgFiCckYVAzSeATkq7v"
-search_index_name="index_name"
 
 client = AzureOpenAI(
     api_key=os.getenv('AZURE_OPENAI_API_KEY'),
