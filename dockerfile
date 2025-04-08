@@ -16,4 +16,4 @@ COPY . .
 RUN pip install -r requirements.txt
 
 # Run your app
-CMD ["python", "-X", "utf8", "app.py"]
+CMD ["python", "app.py"]
