@@ -1,56 +1,35 @@
-# Install system dependencies including tesseract-ocr and set up locale
-RUN apt-get update && apt-get install -y \
-    tesseract-ocr \
-    tesseract-ocr-eng \
-    tesseract-ocr-ara \
-    tesseract-ocr-fra \
-    libtesseract-dev \
-    libleptonica-dev \
-    pkg-config \
-    libpango-1.0-0 \
-    libharfbuzz0b \
-    libfribidi0 \
-    locales \
-    && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
-    && dpkg-reconfigure --frontend=noninteractive locales \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# Use official Python image
+FROM python:3.12-slim
 
-    sudo apt-get update
-sudo apt-get install  tesseract-ocr-dev python3-pil 
-# Set locale environment variables
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Set the working directory
+# Set working directory
 WORKDIR /app
 
-# Copy requirements file
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    poppler-utils \
+    tesseract-ocr \
+    libtesseract-dev \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
 COPY requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the application code
+# Copy app files
 COPY . .
 
-# Make sure the app can find tesseract
-ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
-ENV PATH="/usr/bin:${PATH}"
-
-# Verify tesseract installation
-RUN tesseract --version
-
-# Create necessary directories
-RUN mkdir -p static/pdfs
-
-# Set environment variables
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
-
-# Expose the port
+# Expose the port the app runs on
 EXPOSE 8000
 
-# Command to run the application
+# Run the application
 CMD ["python", "app.py"]
