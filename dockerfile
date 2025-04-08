@@ -10,6 +10,9 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     poppler-utils \
     tesseract-ocr \
+    tesseract-ocr-eng \
+    tesseract-ocr-fra \
+    tesseract-ocr-ara \
     libtesseract-dev \
     libleptonica-dev \
     libsm6 \

@@ -28,8 +28,7 @@ from io import BytesIO
 sys.stdout.reconfigure(encoding='utf-8')
 sys.stderr.reconfigure(encoding='utf-8')
 
-# Set this only if pytesseract can't find tesseract automatically
-pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
+
 
 
 # Font URL
@@ -366,6 +365,8 @@ def extract_text_from_image_url(url):
 
 @app.route('/get-pdf-suggestions', methods=['POST'])
 def get_pdf_suggestions():
+    # Set this only if pytesseract can't find tesseract automatically
+    pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
     try:
         # Log the incoming request data
         sys.stdout.write(f"Received form data: {request.form}\n")
