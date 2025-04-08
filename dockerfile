@@ -9,10 +9,6 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     build-essential \
     poppler-utils \
-    tesseract-ocr \
-    tesseract-ocr-eng \
-    tesseract-ocr-fra \
-    tesseract-ocr-ara \
     libtesseract-dev \
     libleptonica-dev \
     libsm6 \
@@ -20,6 +16,11 @@ RUN apt-get update && apt-get install -y \
     libxrender-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y tesseract-ocr \
+    tesseract-ocr-eng tesseract-ocr-fra tesseract-ocr-ara && \
+    apt-get clean
 
 RUN apt-get install ffmpeg -y
 COPY requirements.txt .
