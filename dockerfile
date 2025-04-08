@@ -23,9 +23,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Set Tesseract path if needed inside your Python app
-ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata/
-ENV PATH="/usr/bin:${PATH}"
 
 EXPOSE 8000
 

@@ -28,6 +28,10 @@ from io import BytesIO
 sys.stdout.reconfigure(encoding='utf-8')
 sys.stderr.reconfigure(encoding='utf-8')
 
+# Set this only if pytesseract can't find tesseract automatically
+pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
+
+
 # Font URL
 FONT_URL = "https://raw.githubusercontent.com/frappe/fonts/master/usr_share_fonts/noto/NotoNaskhArabic-Regular.ttf"
 
