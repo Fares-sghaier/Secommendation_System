@@ -8,7 +8,7 @@ langdetect
 requests
 arabic-reshaper
 python-bidi
-
+docx2txt
 pytesseract
 pillow
 PyCryptodome
