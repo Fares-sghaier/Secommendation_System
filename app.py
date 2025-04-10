@@ -430,7 +430,6 @@ def get_pdf_suggestions():
             sys.stdout.flush()
             return jsonify({"error": "No URL provided"}), 400
         
-
         extracted_text = ""
         
         if pdf_url:
