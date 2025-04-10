@@ -28,7 +28,7 @@ from io import BytesIO
 sys.stdout.reconfigure(encoding='utf-8')
 sys.stderr.reconfigure(encoding='utf-8')
 
-
+import docx2txt
 
 
 # Font URL
@@ -412,13 +412,16 @@ def extract_text_from_image_url(url):
     except Exception as e:
         print(f"Image processing error: {str(e)}")
         return ""
+def extract_text_from_docx_url(url):
+    response = requests.get(url)
+    docx_file = BytesIO(response.content)
+    text = docx2txt.process(docx_file)
+    return text
 
 @app.route('/get-pdf-suggestions', methods=['POST'])
 def get_pdf_suggestions():
     try:
-        sys.stdout.write(f"Received form data: {request.form}\n")
-        sys.stdout.flush()
-        
+        # Get the user input from the request
         pdf_url = request.form.get('pdf_url')
         image_url = request.form.get('image_url')
 
@@ -426,18 +429,30 @@ def get_pdf_suggestions():
             sys.stdout.write("No URL provided in form data\n")
             sys.stdout.flush()
             return jsonify({"error": "No URL provided"}), 400
+        
 
         extracted_text = ""
         
         if pdf_url:
-            sys.stdout.write(f"Attempting to extract text from PDF URL: {pdf_url}\n")
-            sys.stdout.flush()
-            extracted_text = extract_pdf_text_from_url(pdf_url)
-            if not extracted_text:
-                sys.stdout.write("Text extraction from PDF failed\n")
-                sys.stdout.flush()
-                return jsonify({"error": "Failed to extract text from PDF"}), 400
+            file_extension = os.path.splitext(pdf_url)[-1].lower()
 
+            if file_extension == '.pdf':
+                sys.stdout.write(f"Attempting to extract text from PDF URL: {pdf_url}\n")
+                sys.stdout.flush()
+                extracted_text = extract_pdf_text_from_url(pdf_url)
+                if not extracted_text:
+                    sys.stdout.write("Text extraction from PDF failed\n")
+                    sys.stdout.flush()
+                    return jsonify({"error": "Failed to extract text from PDF"}), 400
+            elif file_extension == '.docx' or file_extension == '.doc':
+                sys.stdout.write(f"Attempting to extract text from DOCX URL: {pdf_url}\n")
+                sys.stdout.flush()
+                extracted_text = extract_text_from_docx_url(pdf_url)
+                if not extracted_text:
+                    sys.stdout.write("Text extraction from DOCX failed\n")
+                    sys.stdout.flush()
+                    return jsonify({"error": "Failed to extract text from DOCX"}), 400
+           
         elif image_url:
             sys.stdout.write(f"Attempting to extract text from Image URL: {image_url}\n")
             sys.stdout.flush()
