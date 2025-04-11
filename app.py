@@ -77,21 +77,28 @@ LANGUAGE_CONFIGS = {
             'Recommendation': []
         },
         'pdf_title': "Contract Analysis",
-        'system_prompt': """You are a specialized legal assistant. Analyze the contract according to the structure:
-Missing Articles/Clauses: 
-Problem Description:
-Recommendation:
+        'system_prompt': """You are a specialized legal assistant. Analyze the contract strictly according to the following structure:
+
+Missing Articles/Clauses:  
+Problem Description:  
+Recommendation:  
+
+Instructions:
 - Provide recommendations as a bulleted list.
 - Example:
-• Recommendation 1
+• Recommendation 1  
 • Recommendation 2
 
-PS: in case there are no recommendations or the text is not a contract, please return the following message:
-Missing Articles/Clauses: No missing articles or clauses found
-Problem Description: No problem description found
+IMPORTANT:
+If the input text is not a contract, DO NOT invent or fabricate any content.
+
+Instead, return EXACTLY the following message:
+Missing Articles/Clauses: No missing articles or clauses found  
+Problem Description: No problem description found  
 Recommendation: No recommendations found
-""",
-        
+
+DO NOT HALLUCINATE OR MAKE UP ANYTHING. JUST RETURN THE MESSAGE AS IT IS.
+"""
     },
     'fr': {
         'sections': {
@@ -100,22 +107,30 @@ Recommendation: No recommendations found
             'Recommandation': []
         },
         'pdf_title': "Analyse du Contrat",
-        'system_prompt': """Vous êtes un assistant juridique spécialisé. Analysez le contrat selon la structure:
-Articles/Clauses Manquantes: 
-Description du problème:
-Recommandation:
+        'system_prompt': """Vous êtes un assistant juridique spécialisé. Analysez le contrat selon la structure suivante :
+
+Articles/Clauses Manquantes :  
+Description du problème :  
+Recommandation :  
+
+Instructions :
 - Fournissez les recommandations sous forme de liste à puces.
 - Exemple :
-• Recommandation 1
+• Recommandation 1  
 • Recommandation 2
 
-        En cas de non-recommandations ou le text n'est pas un contrat, veuillez renvoyer le message suivant:
-        Articles/Clauses Manquantes:
-         • il n'y a pas d'articles ou de clauses manquantes
-        Description du problème: 
-         • il n'y a pas de description de problème
-        Recommandation: 
-         • il n'y a pas de recommandations trouvées
+IMPORTANT :
+Si le texte n'est pas un contrat, NE GÉNÉREZ RIEN.
+
+Retournez UNIQUEMENT le message suivant :
+Articles/Clauses Manquantes :  \n
+• il n'y a pas d'articles ou de clauses manquantes  \n
+Description du problème :  \n
+• il n'y a pas de description de problème  \n
+Recommandation :  \n
+• il n'y a pas de recommandations trouvées \n
+
+NE GÉNÉREZ RIEN DE PLUS. NE FAITES PAS D’HALLUCINATIONS. RETOURNEZ LE MESSAGE TEL QUEL.
 """
     },
     'ar': {
@@ -125,27 +140,35 @@ Recommandation:
             'التوصية': []
         },
         'pdf_title': "تحليل العقد",
-        'system_prompt': """  اكتب في شكل اسطر و ليس فقرات.أنت مساعد قانوني متخصص. قم بتحليل العقد وفقاً للهيكل التالي:
-المواد و البنود المفقودة:
-وصف المشكلة:
-التوصية:
+        'system_prompt': """أنت مساعد قانوني متخصص. قم بتحليل العقد وفقاً للبنية التالية:
+
+المواد و البنود المفقودة:  
+وصف المشكلة:  
+التوصية:  
+
+التعليمات:
 - قدم التوصيات في شكل نقاط.
 - مثال:
-• التوصية 1
+• التوصية 1  
 • التوصية 2
 
-in case there are no recommendations or the text is not a contract, please return the following message:
-المواد و البنود المفقودة:
-• لا توجد مواد أو بنود مفقودة 
-وصف المشكلة: 
-• لا توجد مشكلة
-التوصية: 
-• لا توجد توصيات
+هام:
+إذا كان النص ليس عقدًا ، لا تخترع أي محتوى.
 
+في هذه الحالة، ارجع فقط بالرسالة التالية:
 
+المواد و البنود المفقودة:  \n
+• لا توجد مواد أو بنود مفقودة \n 
+وصف المشكلة:  \n
+• لا توجد مشكلة  \n
+التوصية:  \n
+• لا توجد توصيات\n
+
+لا تختلق أو تضيف أي شيء. فقط أعد الرسالة كما هي.
 """
-            }
+    }
 }
+
 
 # Create necessary directories
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -251,9 +274,7 @@ def get_styles(language='en'):
     )
     
     return title_style, section_style, content_style
-
 def create_pdf(content_list, language='en'):
-
     # Ensure font is registered before creating PDF
     if language == 'ar' and not download_and_register_font():
         print("Warning: Could not load Arabic font, falling back to default")
@@ -288,9 +309,13 @@ def create_pdf(content_list, language='en'):
 
         if item['type'] == 'header':
             elements.append(Paragraph(text, section_style))
-        else:
+        elif item['type'] == 'bullet':
             bullet = '•' if language != 'ar' else '•'
             elements.append(Paragraph(f"{bullet} {text}", content_style))
+            elements.append(Spacer(1, 5))
+        elif item['type'] == 'plain':
+            # Add plain text without bullet
+            elements.append(Paragraph(text, content_style))
             elements.append(Spacer(1, 5))
 
     # Add logo at the bottom of the page
@@ -300,6 +325,7 @@ def create_pdf(content_list, language='en'):
         img.hAlign = 'CENTER'
         elements.append(Spacer(1, 20))
         elements.append(img)
+
     # Add metadata (title and author)
     def add_metadata(canvas, doc):
         canvas.setTitle("E-Tafakna Recommendations")
@@ -383,16 +409,30 @@ def format_response(text, language):
         
         is_header = False
         for section in sections:
-            if section.lower() in line.lower() or (language == 'ar' and section in line):
+            # Check if line starts with section header followed by a colon
+            if line.startswith(f"{section}:"):
+                current_section = section
+                formatted_content.append({"type": "header", "text": current_section})
+                # Extract content after colon
+                content = line.split(':', 1)[1].strip()
+                if content:
+                    formatted_content.append({"type": "plain", "text": content})
+                is_header = True
+                break
+            elif section.lower() in line.lower() or (language == 'ar' and section in line):
                 current_section = section
                 formatted_content.append({"type": "header", "text": current_section})
                 is_header = True
                 break
         
         if not is_header and current_section:
-            cleaned_line = re.sub(r'^[-•*]\s*', '', line)
-            if cleaned_line:
-                formatted_content.append({"type": "content", "text": cleaned_line})
+            # Check if line starts with a bullet
+            bullet_match = re.match(r'^[-•*]\s*(.*)', line)
+            if bullet_match:
+                cleaned_line = bullet_match.group(1).strip()
+                formatted_content.append({"type": "bullet", "text": cleaned_line})
+            else:
+                formatted_content.append({"type": "plain", "text": line})
 
     # Create PDF with structured content
     pdf_url = create_pdf(formatted_content, language)
