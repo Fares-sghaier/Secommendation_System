@@ -120,7 +120,7 @@ Recommandation:
 • التوصية 1
 • التوصية 2
 
-PS: if there are no recommendations, write "No recommendations found"
+PS: if the document is not a contract or there are no recommendations, write "No recommendations found"
 
 """
     }
