@@ -85,7 +85,13 @@ Recommendation:
 - Example:
 • Recommendation 1
 • Recommendation 2
-"""
+
+PS: in case there are no recommendations or the text is not a contract, please return the following message:
+Missing Articles/Clauses: No missing articles or clauses found
+Problem Description:No problem description found
+Recommendation: No recommendations found
+""",
+        
     },
     'fr': {
         'sections': {
@@ -102,6 +108,11 @@ Recommandation:
 - Exemple :
 • Recommandation 1
 • Recommandation 2
+
+        En cas de non-recommandations ou le text n'est pas un contrat, veuillez renvoyer le message suivant:
+        Articles/Clauses Manquantes:  il n'y a pas d'articles ou de clauses manquantes
+        Description du problème: il n'y a pas de description de problème
+        Recommandation:  il n'y a pas de recommandations trouvées
 """
     },
     'ar': {
@@ -117,13 +128,16 @@ Recommandation:
 التوصية:
 - قدم التوصيات في شكل نقاط.
 - مثال:
-• التوصية 1
-• التوصية 2
+التوصية 1
+ التوصية 2
 
-PS: if the document is not a contract or there are no recommendations, write "No recommendations found"
+in case there are no recommendations or the text is not a contract, please return the following message:
+المواد و البنود المفقودة:  لا توجد مواد أو بنود مفقودة 
+وصف المشكلة: لا توجد مشكلة
+التوصية:لا توجد توصيات
 
 """
-    }
+            }
 }
 
 # Create necessary directories
