@@ -119,6 +119,9 @@ Recommandation:
 - مثال:
 • التوصية 1
 • التوصية 2
+
+PS: if there are no recommendations, write "No recommendations found"
+
 """
     }
 }
