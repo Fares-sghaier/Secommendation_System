@@ -438,7 +438,7 @@ def format_response(text, language):
     pdf_url = create_pdf(formatted_content, language)
     
     return {
-        'pdf_url': pdf_url,
+        'pdf_url': pdf_url.replace('http://', 'https://'),
         'text': text
     }
 
