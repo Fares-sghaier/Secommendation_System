@@ -9,7 +9,6 @@ from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
-from io import BytesIO
 import PyPDF2
 import sys
 import requests
@@ -516,14 +515,15 @@ def get_pdf_suggestions():
                     sys.stdout.flush()
                     return jsonify({"error": "Failed to extract text from DOCX"}), 400
            
-        elif image_url:
-            sys.stdout.write(f"Attempting to extract text from Image URL: {image_url}\n")
-            sys.stdout.flush()
-            extracted_text = extract_text_from_image_url(image_url)
-            if not extracted_text:
-                sys.stdout.write("Text extraction from Image failed\n")
+            elif file_extension == '.JPG' or 'PNG' or 'JPEG' or 'GIF' or 'WEBP' or 'TIFF' or 'PSD' or 'RAW' or 'BMP':
+                sys.stdout.write(f"Attempting to extract text from Image URL: {pdf_url}\n")
                 sys.stdout.flush()
-                return jsonify({"error": "Failed to extract text from Image"}), 400
+                extracted_text = extract_text_from_image_url(pdf_url)
+                if not extracted_text:
+                    sys.stdout.write("Text extraction from Image failed\n")
+                    sys.stdout.flush()
+                    return jsonify({"error": "Failed to extract text from Image"}), 400
+            
 
         sys.stdout.write(f"Successfully extracted text of length: {len(extracted_text)}\n")
         sys.stdout.flush()
