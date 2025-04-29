@@ -88,13 +88,15 @@ Instructions:
 • Recommendation 1  
 • Recommendation 2
 
-IMPORTANT:
-If the input text is not a contract, DO NOT invent or fabricate any content.
 
-Instead, return EXACTLY the following message:
+Return EXACTLY the following message if the text did not need any recommendations:
 Missing Articles/Clauses: No missing articles or clauses found  
 Problem Description: No problem description found  
 Recommendation: No recommendations found
+
+
+IMPORTANT:
+If the input text is not a contract, DO NOT invent or fabricate any content, and return the message "the document should be a contract".
 
 DO NOT HALLUCINATE OR MAKE UP ANYTHING. JUST RETURN THE MESSAGE AS IT IS.
 """
@@ -118,10 +120,9 @@ Instructions :
 • Recommandation 1  
 • Recommandation 2
 
-IMPORTANT :
-Si le texte n'est pas un contrat, NE GÉNÉREZ RIEN.
 
-Retournez UNIQUEMENT le message suivant :
+
+Retournez UNIQUEMENT le message suivant si le texte n'a pas besoin de recommandations :
 Articles/Clauses Manquantes :  \n
 • il n'y a pas d'articles ou de clauses manquantes  \n
 Description du problème :  \n
@@ -129,6 +130,8 @@ Description du problème :  \n
 Recommandation :  \n
 • il n'y a pas de recommandations trouvées \n
 
+IMPORTANT :
+Si le texte n'est pas un contrat, NE GÉNÉREZ RIEN. retournez UNIQUEMENT le message suivant : "le document doit être un contrat".
 NE GÉNÉREZ RIEN DE PLUS. NE FAITES PAS D’HALLUCINATIONS. RETOURNEZ LE MESSAGE TEL QUEL.
 """
     },
@@ -151,10 +154,8 @@ NE GÉNÉREZ RIEN DE PLUS. NE FAITES PAS D’HALLUCINATIONS. RETOURNEZ LE MESSAG
 • التوصية 1  
 • التوصية 2
 
-هام:
-إذا كان النص ليس عقدًا ، لا تخترع أي محتوى.
 
-في هذه الحالة، ارجع فقط بالرسالة التالية:
+  ارجع فقط بالرسالة التالية:
 
 المواد و البنود المفقودة:  \n
 • لا توجد مواد أو بنود مفقودة \n 
@@ -163,6 +164,8 @@ NE GÉNÉREZ RIEN DE PLUS. NE FAITES PAS D’HALLUCINATIONS. RETOURNEZ LE MESSAG
 التوصية:  \n
 • لا توجد توصيات\n
 
+هام:
+إذا كان النص ليس عقدًا ، لا تخترع أي محتوى. إرجع فقط بالرسال "يجب أن يكون الملف عقدا" 
 لا تختلق أو تضيف أي شيء. فقط أعد الرسالة كما هي.
 """
     }
@@ -393,6 +396,12 @@ def extract_pdf_text_from_url(url):
 
 
 def format_response(text, language):
+
+    if text == "the document should be a contract" or text == "يجب أن يكون الملف عقدا"or text == "le document doit être un contrat":
+        return {
+            'pdf_url': None,
+            'text': text
+        }
     if isinstance(text, bytes):
         text = text.decode('utf-8')
 
