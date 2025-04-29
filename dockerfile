@@ -35,15 +35,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 WORKDIR /app
 COPY . .
 
-# Add a check that runs when container starts
-RUN echo '#!/bin/bash \n\
-echo "=== Checking Tesseract Installation ===" \n\
-which tesseract \n\
-tesseract --version \n\
-echo "=== Starting Application ===" \n\
-exec "$@"' > /entrypoint.sh && chmod +x /entrypoint.sh
+
 
 EXPOSE 8000
 
-ENTRYPOINT ["/entrypoint.sh"]
 CMD ["python", "app.py"]
