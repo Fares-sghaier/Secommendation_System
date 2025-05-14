@@ -38,35 +38,13 @@ CORS(app)
 import os
 import subprocess
 
-# Try to find tesseract installation
-try:
-    # Check if tesseract is in PATH
-    result = subprocess.run(['which', 'tesseract'], 
-                           capture_output=True, text=True, check=False)
-    tesseract_path = result.stdout.strip()
-    
-    if tesseract_path:
-        print(f"Found tesseract at: {tesseract_path}")
-        pytesseract.pytesseract.tesseract_cmd = tesseract_path
-    else:
-        # Try common locations
-        common_paths = [
-            '/usr/bin/tesseract',
-            '/usr/local/bin/tesseract'
-        ]
-        
-        for path in common_paths:
-            if os.path.exists(path):
-                print(f"Setting tesseract path to: {path}")
-                pytesseract.pytesseract.tesseract_cmd = path
-                break
-    
-    # Verify it works
-    version = pytesseract.get_tesseract_version()
-    print(f"Tesseract version: {version}")
-    
-except Exception as e:
-    print(f"Error configuring tesseract: {e}")
+
+def get_mime_type_from_headers(url):
+    try:
+        response = requests.head(url, allow_redirects=True)
+        return response.headers.get('Content-Type', '').lower()
+    except Exception as e:
+        return None
 # Language-specific configurations
 LANGUAGE_CONFIGS = {
     'en': {
@@ -505,35 +483,26 @@ def get_pdf_suggestions():
         extracted_text = ""
         
         if pdf_url:
-            file_extension = os.path.splitext(pdf_url)[-1].lower()
-
-            if file_extension == '.pdf':
-                sys.stdout.write(f"Attempting to extract text from PDF URL: {pdf_url}\n")
-                sys.stdout.flush()
+            mime_type = get_mime_type_from_headers(pdf_url)
+            if mime_type and 'application/pdf' in mime_type:
                 extracted_text = extract_pdf_text_from_url(pdf_url)
-                if not extracted_text:
-                    sys.stdout.write("Text extraction from PDF failed\n")
-                    sys.stdout.flush()
-                    return jsonify({"error": "Failed to extract text from PDF"}), 400
-            elif file_extension == '.docx' or file_extension == '.doc':
-                sys.stdout.write(f"Attempting to extract text from DOCX URL: {pdf_url}\n")
-                sys.stdout.flush()
+            elif mime_type and 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' in mime_type:
                 extracted_text = extract_text_from_docx_url(pdf_url)
-                if not extracted_text:
-                    sys.stdout.write("Text extraction from DOCX failed\n")
-                    sys.stdout.flush()
-                    return jsonify({"error": "Failed to extract text from DOCX"}), 400
-           
-            elif file_extension == '.JPG' or 'PNG' or 'JPEG' or 'GIF' or 'WEBP' or 'TIFF' or 'PSD' or 'RAW' or 'BMP':
-                sys.stdout.write(f"Attempting to extract text from Image URL: {pdf_url}\n")
+            elif mime_type and 'application/msword' in mime_type:
+                extracted_text = extract_text_from_docx_url(pdf_url)
+            else:
+                sys.stdout.write("Invalid PDF URL or MIME type\n")
                 sys.stdout.flush()
-                extracted_text = extract_text_from_image_url(pdf_url)
-                if not extracted_text:
-                    sys.stdout.write("Text extraction from Image failed\n")
-                    sys.stdout.flush()
-                    return jsonify({"error": "Failed to extract text from Image"}), 400
+                return jsonify({"error": "Invalid PDF URL or MIME type"}), 400
+        elif image_url:
+            mime_type = get_mime_type_from_headers(image_url)
+            if mime_type and 'image/' in mime_type:
+                extracted_text = extract_text_from_image_url(image_url)
+            else:
+                sys.stdout.write("Invalid image URL or MIME type\n")
+                sys.stdout.flush()
+                return jsonify({"error": "Invalid image URL or MIME type"}), 400
             
-
         sys.stdout.write(f"Successfully extracted text of length: {len(extracted_text)}\n")
         sys.stdout.flush()
         language = detect_language(extracted_text)
